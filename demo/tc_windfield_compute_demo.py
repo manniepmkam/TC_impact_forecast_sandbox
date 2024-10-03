@@ -11,10 +11,11 @@ Output: climada.hazard.Hazard class in .hdf5 format
 
 import time
 import numpy as np
+from pathlib import Path
 import warnings
 warnings.filterwarnings("ignore")
 
-from climada.hazard import TropCyclone
+from climada.hazard import TCTracks, TropCyclone
 from climada_petals.hazard import TCForecast
 
 from climada.util.api_client import Client
@@ -22,7 +23,9 @@ client = Client()
 
 time_start = time.time()
 
-SAVE_WIND_DIR = "../../data/tc_wind/"
+SAVE_WIND_DIR = "./data/tc_wind/"
+
+BUFR_TRACKS_FOLDER = "./data/20240825000000/"
 
 CAT_NUMBER = {'Tropical Depression': -1,
               'Tropical Storm': 0,
@@ -44,23 +47,24 @@ def filter_storm(fcast):
     Returns
     -------
     fcast_filter : climada.TCForecast
-        Filtered storm with at lease 1 member forecasted Tropical Storm cat. or above
+        TCForecast class with storms which are named storm
 
     """
-    sid_list = [tr.sid for tr in fcast.data]
-    sid_list = list(set(sid_list))
+    tr_name_list = [tr.name for tr in fcast.data]
+    tr_name_list = list(set(tr_name_list))
     
-    fcast_filter = TCForecast()
-    
-    for sid in sid_list:
-        single_storm = [tr for tr in fcast.data if tr.sid==sid]
-        
-        cat = np.array([CAT_NUMBER[tr.category] for tr in single_storm])
-        
-        if np.any(cat>=0):
-            fcast_filter.data.extend(single_storm)
-        else:
+    fcast_filter = TCTracks()
+
+    for tr_name in tr_name_list:
+
+        if tr_name[:2].isdigit():
             continue
+        
+        else:
+            fcast_filter.append(fcast.subset({
+                'name': tr_name
+            }).data)
+    
     
     return fcast_filter
 
@@ -69,16 +73,27 @@ glob_centroids = client.get_centroids()
 
 # retrieve the latest forecast
 tr_fcast = TCForecast()
-tr_fcast.fetch_ecmwf()
+tr_fcast.fetch_ecmwf(path=BUFR_TRACKS_FOLDER)
 tr_filter = filter_storm(tr_fcast)
 
-# compute the windspeed
-tc_wind = TropCyclone.from_tracks(tr_filter, glob_centroids)
+tr_name_unique = set([tr.name for tr in tr_filter.data])
 
-tc_wind.write_hdf5(SAVE_WIND_DIR +"test_run.hdf5")
+for tr_name in tr_name_unique:
+    # select single storm and interpolate the tracks
+    tr_one_storm = tr_filter.subset({'name': tr_name})
+    tr_one_storm.equal_timestep(.5)
 
+    # refine the centroids
+    storm_extent = tr_one_storm.get_extent(deg_buffer=5.)
+    centroids_refine = glob_centroids.select(extent=storm_extent)
+
+    # compute the windfield for each storm
+    tc_wind_one_storm = TropCyclone.from_tracks(tr_one_storm, centroids_refine)
+    tc_wind_one_storm.write_hdf5(SAVE_WIND_DIR +'tc_wind_' +tr_name +'20240825000000.hdf5')
+
+# record the time
 time_end = time.time()
 
-print("TC wind computation complete. Time:" +str(time_end-time_start))
+print("TC wind computation complete. Time: " +str(time_end-time_start))
 
 

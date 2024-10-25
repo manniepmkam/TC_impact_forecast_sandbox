@@ -95,8 +95,6 @@ _correct_max_sustained_wind_speed(tr_filter)
 
 fig = plot_global_tracks(tr_filter).get_figure().savefig('./tracks_20240825000000.png')
 
-tr_filter.plot().get_figure().savefig('./tracks_control+.png')
-
 tr_name_unique = set([tr.name for tr in tr_filter.data])
 
 for tr_name in tr_name_unique:
@@ -109,11 +107,9 @@ for tr_name in tr_name_unique:
 
     # compute the windfield for each storm
     tc_wind_one_storm = TropCyclone.from_tracks(tr_one_storm, centroids_refine)
-    tc_wind_one_storm.write_hdf5(SAVE_WIND_DIR +'tc_wind_' +tr_name +'20240825000000.hdf5')
+    tc_wind_one_storm.write_hdf5(SAVE_WIND_DIR +'tc_wind_' +tr_name +'_20240825000000.hdf5')
 
 # record the time
 time_end = time.time()
 
 print("TC wind computation complete. Time: " +str(time_end-time_start))
-
-

@@ -65,7 +65,7 @@ def plot_global_tracks(tc_tracks: TCTracks, figsize=(15,8)):
     leg_lines = [Line2D([0], [0], color=CAT_COLORS[i_col], lw=2)
                 for i_col in range(len(SAFFIR_SIM_CAT))]
     leg_names = [CAT_NAMES[i_col] for i_col in sorted(CAT_NAMES.keys())]
-    axis.legend(leg_lines, leg_names, loc=3, fontsize=10)
+    axis.legend(leg_lines, leg_names, loc=3, fontsize=12)
 
     plt.tight_layout()
 

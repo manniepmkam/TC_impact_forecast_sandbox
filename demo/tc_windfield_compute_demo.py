@@ -17,8 +17,10 @@ warnings.filterwarnings("ignore")
 
 from climada.hazard import TCTracks, TropCyclone
 from climada_petals.hazard import TCForecast
-
 from climada.util.api_client import Client
+
+from plot_func import plot_global_tracks
+
 client = Client()
 
 time_start = time.time()
@@ -27,15 +29,14 @@ SAVE_WIND_DIR = "./data/tc_wind/"
 
 BUFR_TRACKS_FOLDER = "./data/20240825000000/"
 
-CAT_NUMBER = {'Tropical Depression': -1,
-              'Tropical Storm': 0,
-              'Hurricane Cat. 1': 1,
-              'Hurricane Cat. 2': 2,
-              'Hurricane Cat. 3': 3,
-              'Hurricane Cat. 4': 4,
-              'Hurricane Cat. 5': 5}
+# We use the traditional WMO guidelines for converting between various wind averaging periods
+# in tropical cyclone conditions (cf. https://library.wmo.int/doc_num.php?explnum_id=290)
+# Our input data is giving the maximum sustained wind speed for ten minute intervals while we need it for one minute
+# intervals. In one minute intervals, changes in wind speed are more pronounced, so we need to make the maximum
+# sustained wind speed slightly bigger.
+WIND_CONVERSION_FACTOR = 1. / 0.88
 
-def filter_storm(fcast):
+def filter_storm(fcast: TCForecast):
     """
     
 
@@ -68,6 +69,20 @@ def filter_storm(fcast):
     
     return fcast_filter
 
+def _correct_max_sustained_wind_speed(tc_forecast: TCForecast,
+                                      wind_conversion_factor: float = WIND_CONVERSION_FACTOR) -> None:
+    """
+    Converts the maximum sustained wind speed by a given factor. The sustained wind speed is defined as the wind speed
+    which has not been underrun by any measurement within a given time interval.
+    Note that the operation of multiplying by a constant factor is simplifying reality and a more complex method
+    should be used eventually
+    :param tc_forecast: The tracks object to which the modification is applied
+    :param wind_conversion_factor: The factor by which the maximum sustained wind will be modified
+    :return:
+    """
+    for dataset in tc_forecast.data:
+        dataset['max_sustained_wind'] *= wind_conversion_factor
+
 # retrieve the Centroids from 
 glob_centroids = client.get_centroids()
 
@@ -75,13 +90,18 @@ glob_centroids = client.get_centroids()
 tr_fcast = TCForecast()
 tr_fcast.fetch_ecmwf(path=BUFR_TRACKS_FOLDER)
 tr_filter = filter_storm(tr_fcast)
+tr_filter.equal_timestep(.5)
+_correct_max_sustained_wind_speed(tr_filter)
+
+fig = plot_global_tracks(tr_filter).get_figure().savefig('./tracks_20240825000000.png')
+
+tr_filter.plot().get_figure().savefig('./tracks_control+.png')
 
 tr_name_unique = set([tr.name for tr in tr_filter.data])
 
 for tr_name in tr_name_unique:
     # select single storm and interpolate the tracks
     tr_one_storm = tr_filter.subset({'name': tr_name})
-    tr_one_storm.equal_timestep(.5)
 
     # refine the centroids
     storm_extent = tr_one_storm.get_extent(deg_buffer=5.)

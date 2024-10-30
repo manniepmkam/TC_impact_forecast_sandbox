@@ -1,0 +1,2 @@
+# ignore large .hdf5 files
+data/demo/tc_wind/*.hdf5

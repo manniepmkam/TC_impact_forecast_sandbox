@@ -25,9 +25,9 @@ client = Client()
 
 time_start = time.time()
 
-SAVE_WIND_DIR = "./data/tc_wind/"
+SAVE_WIND_DIR = "./demo/data/tc_wind/"
 
-BUFR_TRACKS_FOLDER = "./data/20240825000000/"
+BUFR_TRACKS_FOLDER = "./demo/data/20240825000000"
 
 # We use the traditional WMO guidelines for converting between various wind averaging periods
 # in tropical cyclone conditions (cf. https://library.wmo.int/doc_num.php?explnum_id=290)
@@ -63,7 +63,8 @@ def filter_storm(fcast: TCForecast):
         
         else:
             fcast_filter.append(fcast.subset({
-                'name': tr_name
+                "name": tr_name,
+                "is_ensemble": True
             }).data)
     
     

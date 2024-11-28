@@ -70,3 +70,29 @@ def plot_global_tracks(tc_tracks: TCTracks, figsize=(15,8)):
     plt.tight_layout()
 
     return axis
+
+def plot_empty_base_map():
+    # define the figure and figure extent
+    fig = plt.figure(figsize=figsize)
+    axis = plt.axes(projection=ccrs.PlateCarree())
+    axis.add_feature(cf.COASTLINE, color='k',lw=.5)
+    axis.add_feature(cf.BORDERS, color="k", lw=.3)
+    axis.add_feature(cf.LAND, facecolor="rosybrown", alpha=.2)
+    axis.set_extent([-180, 180, -80, 80], crs=ccrs.PlateCarree())
+
+    # grid lines on the lat lon
+    gl = axis.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                  linewidth=.5, color='gray', alpha = 0.25,
+                  linestyle='--')
+    # labels on bottom and left axes
+    axis.xlabels_top = False
+    axis.ylabels_right = False
+
+    leg_lines = [Line2D([0], [0], color=CAT_COLORS[i_col], lw=2)
+                for i_col in range(len(SAFFIR_SIM_CAT))]
+    leg_names = [CAT_NAMES[i_col] for i_col in sorted(CAT_NAMES.keys())]
+    axis.legend(leg_lines, leg_names, loc=3, fontsize=12)
+
+    plt.tight_layout()
+
+    return axis

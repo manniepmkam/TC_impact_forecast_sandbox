@@ -16,53 +16,14 @@ warnings.filterwarnings("ignore")
 
 from climada.hazard import TropCyclone
 from climada_petals.hazard import TCForecast
-
 from climada.util.api_client import Client
 client = Client()
+
+from tc_tracks_func import filter_storm, _correct_max_sustained_wind_speed
 
 time_start = time.time()
 
 SAVE_WIND_DIR = "../../data/tc_wind/"
-
-CAT_NUMBER = {'Tropical Depression': -1,
-              'Tropical Storm': 0,
-              'Hurricane Cat. 1': 1,
-              'Hurricane Cat. 2': 2,
-              'Hurricane Cat. 3': 3,
-              'Hurricane Cat. 4': 4,
-              'Hurricane Cat. 5': 5}
-
-def filter_storm(fcast):
-    """
-    
-
-    Parameters
-    ----------
-    fcast : climada.TCForecast
-        The set of forecast data from ECMWF
-
-    Returns
-    -------
-    fcast_filter : climada.TCForecast
-        Filtered storm with at lease 1 member forecasted Tropical Storm cat. or above
-
-    """
-    sid_list = [tr.sid for tr in fcast.data]
-    sid_list = list(set(sid_list))
-    
-    fcast_filter = TCForecast()
-    
-    for sid in sid_list:
-        single_storm = [tr for tr in fcast.data if tr.sid==sid]
-        
-        cat = np.array([CAT_NUMBER[tr.category] for tr in single_storm])
-        
-        if np.any(cat>=0):
-            fcast_filter.data.extend(single_storm)
-        else:
-            continue
-    
-    return fcast_filter
 
 # retrieve the Centroids from 
 glob_centroids = client.get_centroids()
@@ -71,14 +32,37 @@ glob_centroids = client.get_centroids()
 tr_fcast = TCForecast()
 tr_fcast.fetch_ecmwf()
 tr_filter = filter_storm(tr_fcast)
+tr_filter.equal_timestep(.5)
+_correct_max_sustained_wind_speed(tr_filter)
 
-# compute the windspeed
-tc_wind = TropCyclone.from_tracks(tr_filter, glob_centroids)
+# retrieve dateimt information
+run_datetime = tr_fcast.data[0].run_datetime
+datetime_temp = run_datetime.astype('datetime64[s]').astype(str)
+formatted_datetime = datetime_temp.replace('T', '_')[:-6] + 'UTC'
 
-tc_wind.write_hdf5(SAVE_WIND_DIR +"test_run.hdf5")
+if len(tr_filter.data) != 0:
 
+    tr_name_unique = set([tr.name for tr in tr_filter.data])
+
+    for tr_name in tr_name_unique:
+        # select single storm and interpolate the tracks
+        tr_one_storm = tr_filter.subset({'name': tr_name})
+
+        # refine the centroids
+        storm_extent = tr_one_storm.get_extent(deg_buffer=5.)
+        centroids_refine = glob_centroids.select(extent=storm_extent)
+
+        # compute the windfield for each storm
+        tc_wind_one_storm = TropCyclone.from_tracks(tr_one_storm, centroids_refine,
+                                                    model="H1980")
+        tc_wind_one_storm.write_hdf5(SAVE_WIND_DIR +'tc_wind_' +tr_name +'_' +formatted_datetime +'.hdf5')
+
+else:
+    print(f"There is no active storm forecasted at {formatted_datetime}")
+
+# record the time
 time_end = time.time()
 
-print("TC wind computation complete. Time:" +str(time_end-time_start))
+print("TC wind computation complete. Time: " +str(time_end-time_start))
 
 

@@ -8,7 +8,6 @@ Output: climada.hazard.Hazard class in .hdf5 format
 
 @author: Pui Man (Mannie) Kam
 """
-
 import time
 import numpy as np
 import warnings
@@ -64,5 +63,3 @@ else:
 time_end = time.time()
 
 print("TC wind computation complete. Time: " +str(time_end-time_start))
-
-

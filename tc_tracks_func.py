@@ -7,9 +7,6 @@ Useful functions for extracting TC tracks from ECMWF.
 
 @author: Pui Man (Mannie) Kam
 """
-import numpy as np
-import matplotlib.cm as cm_mp
-
 from climada_petals.hazard import TCForecast
 from climada.hazard import TCTracks
 

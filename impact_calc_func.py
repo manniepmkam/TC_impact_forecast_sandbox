@@ -8,6 +8,7 @@ Useful functions for impact calculations.
 @author: Pui Man (Mannie) Kam
 """
 import numpy as np
+import pandas as pd
 
 from climada.entity import ImpactFunc, ImpfTropCyclone, ImpactFuncSet
 
@@ -138,3 +139,22 @@ def get_impf_v_half(country: str):
     v_half = v_half_per_region[basin[0]]
     
     return v_half
+
+def round_to_previous_12h_utc(timestamp: pd.Timestamp):
+    """
+    Rounding the time into 00 or 12 UTC
+    """
+    # Ensure the timestamp is in UTC
+    if timestamp.tz is None:
+        utc_timestamp = timestamp.tz_localize('UTC')
+    else:
+        utc_timestamp = timestamp.tz_convert('UTC')
+    
+    # Round down to the nearest hour
+    rounded = utc_timestamp.floor('H')
+    
+    # Determine the previous 12-hour mark
+    if rounded.hour < 12:
+        return rounded.replace(hour=0)
+    else:
+        return rounded.replace(hour=12)

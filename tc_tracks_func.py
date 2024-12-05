@@ -58,7 +58,8 @@ def filter_storm(fcast: TCForecast):
         
         else:
             fcast_filter.append(fcast.subset({
-                'name': tr_name
+                'name': tr_name,
+                'is_ensemble': True
             }).data)
     
     

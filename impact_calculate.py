@@ -24,7 +24,8 @@ client = Client()
 
 from impact_calc_func import (
     impf_set_exposed_pop, impf_set_displacement,
-    round_to_previous_12h_utc, summarize_forecast,
+    round_to_previous_12h_utc, get_forecast_times,
+    get_tc_wind_files, summarize_forecast,
     save_forecast_summary, make_save_summary_filename
 )
 
@@ -37,39 +38,17 @@ TC_WIND_DIR = "./demo/data/tc_wind" # change to a scratch folder
 # Get the current timestamp
 # current_timestamp = pd.Timestamp.now().tz_localize('UTC')
 current_timestamp = pd.Timestamp('2024-08-25 02:00', tz='UTC')
-forecast_time = round_to_previous_12h_utc(current_timestamp)
-# Format the timestamp string
-forecast_time_str = forecast_time.strftime('%Y-%m-%d_%HUTC')
 
-# Subtract 12h to get the previous forecast
-previous_forecast_time = forecast_time - pd.Timedelta(hours=12)
+forecast_time, previous_forecast_time = get_forecast_times(current_timestamp)
+tc_wind_files = get_tc_wind_files(forecast_time, previous_forecast_time, TC_WIND_DIR)
 
-# Create the file pattern
-TC_WIND_FILE_PATTERN = os.path.join(
-    TC_WIND_DIR,
-    f"*{forecast_time_str}.hdf5"
-)
-
-# Get the list of matching files
-TC_WIND_FILE_LIST = glob.glob(TC_WIND_FILE_PATTERN)
-
-# check if there is any TC activities
-if len(TC_WIND_FILE_LIST) == 0:
+if not tc_wind_files:
     print(f"No TC activities at {forecast_time.strftime('%Y-%m-%d_%HUTC')}.")
-    print(f"Try the previous forecast.")
-
-    # now try the forecast at 12h earlier
-    TC_WIND_FILE_LIST = glob.glob(TC_WIND_FILE_PATTERN.format(
-    forecast_time_str = previous_forecast_time.strftime('%Y-%m-%d_%HUTC')))
-
-    if len(TC_WIND_FILE_LIST) == 0:
-         print(f"No TC activities at {forecast_time_str}.")
-         print(f"End impact calculation script")
-         
-         exit() # exit the script
+    print("End impact calculation script")
+    exit()
 
 # Now start the impact calculation for all the storms
-for tc_file in TC_WIND_FILE_LIST:
+for tc_file in tc_wind_files:
 
 
     # extract the tc_name from the hdf file
@@ -110,15 +89,15 @@ for tc_file in TC_WIND_FILE_LIST:
 
         if impact_exposed.aai_agg == 0.: # do not save the files if impact is 0.
             continue
-        
+
         imp_exposed_summary = summarize_forecast(country_iso3=country_to_iso(country_code, 
                                                                      "alpha3"),
-                                        forecast_time=forecast_time_str,
+                                        forecast_time=forecast_time.strftime('%Y-%m-%d_%HUTC'),
                                         impact_type="exposed_population_32.92ms",
                                         tc_haz=tc_haz,
                                         tc_name=tc_name,
                                         impact=impact_exposed)
-        
+
         save_forecast_summary(imp_exposed_summary, 
             SAVE_DIR +make_save_summary_filename(imp_exposed_summary))
 
@@ -131,12 +110,12 @@ for tc_file in TC_WIND_FILE_LIST:
             continue
         imp_displacement_summary = summarize_forecast(country_iso3=country_to_iso(country_code, 
                                                                      "alpha3"),
-                                                    forecast_time=forecast_time_str,
+                                                    forecast_time=forecast_time.strftime('%Y-%m-%d_%HUTC'),
                                                     impact_type="displacement",
                                                     tc_haz=tc_haz,
                                                     tc_name=tc_name,
                                                     impact=impact_displacement)
-        
+
         save_forecast_summary(imp_displacement_summary, 
             SAVE_DIR +make_save_summary_filename(imp_displacement_summary))
 

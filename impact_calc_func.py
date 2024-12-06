@@ -7,10 +7,12 @@ Useful functions for impact calculations.
 
 @author: Pui Man (Mannie) Kam
 """
+import os
+import glob
 import numpy as np
 import pandas as pd
 import json
-from typing import Union
+from typing import Union, List, Tuple
 from pathlib import Path
 
 from climada.hazard import TCTracks
@@ -163,6 +165,28 @@ def round_to_previous_12h_utc(timestamp: pd.Timestamp):
         return rounded.replace(hour=0)
     else:
         return rounded.replace(hour=12)
+
+def get_forecast_times(current_timestamp: pd.Timestamp) -> Tuple[pd.Timestamp, pd.Timestamp]:
+    """Get the current and previous forecast times."""
+    forecast_time = round_to_previous_12h_utc(current_timestamp)
+    previous_forecast_time = forecast_time - pd.Timedelta(hours=12)
+    return forecast_time, previous_forecast_time
+
+def get_tc_wind_files(forecast_time: pd.Timestamp, 
+                      previous_forecast_time: pd.Timestamp, 
+                      tc_wind_dir: str) -> List[str]:
+    """Get the list of TC wind files for the given forecast times."""
+    forecast_time_str = forecast_time.strftime('%Y-%m-%d_%HUTC')
+    file_pattern = os.path.join(tc_wind_dir, f"*{forecast_time_str}.hdf5")
+    tc_wind_files = glob.glob(file_pattern)
+    
+    if not tc_wind_files:
+        print(f"No TC activities at {forecast_time_str}. Trying the previous forecast.")
+        previous_forecast_time_str = previous_forecast_time.strftime('%Y-%m-%d_%HUTC')
+        file_pattern = os.path.join(tc_wind_dir, f"*{previous_forecast_time_str}.hdf5")
+        tc_wind_files = glob.glob(file_pattern)
+        
+    return tc_wind_files
     
 def summarize_forecast(country_iso3: str,
                        forecast_time: str,

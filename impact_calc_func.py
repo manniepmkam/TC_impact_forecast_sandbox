@@ -9,8 +9,13 @@ Useful functions for impact calculations.
 """
 import numpy as np
 import pandas as pd
+import json
+from typing import Union
+from pathlib import Path
 
+from climada.hazard import TCTracks
 from climada.entity import ImpactFunc, ImpfTropCyclone, ImpactFuncSet
+from climada.engine import Impact
 
 #  List of regions and the countries
 iso3_to_basin = {'NA1': ['AIA', 'ATG', 'ARG', 'ABW', 'BHS', 'BRB', 'BLZ', 'BMU',
@@ -158,3 +163,81 @@ def round_to_previous_12h_utc(timestamp: pd.Timestamp):
         return rounded.replace(hour=0)
     else:
         return rounded.replace(hour=12)
+    
+def summarize_forecast(country_iso3: str,
+                       forecast_time: str,
+                       impact_type: str,
+                       tc_haz: TCTracks,
+                       tc_name: str,
+                       impact: Impact):
+    """
+    Summarizing forecast into a dictionary
+    """
+    # check impact event length
+    ## incase the TC ensemble number is less than 51
+    # get the array for each event
+    imp_at_event = _check_event_no(impact)
+
+    imp_summary_dict={
+        "countryISO3": country_iso3,
+        "hazardType": impact.haz_type,
+        "impactType": impact_type,
+        "initializationTime": forecast_time,
+        "eventName": tc_name,
+        "mean": np.mean(imp_at_event),
+        "median": np.median(imp_at_event),
+        "05perc": np.percentile(imp_at_event, 5),
+        "25perc": np.percentile(imp_at_event, 25),
+        "75perc": np.percentile(imp_at_event, 75),
+        "95perc": np.percentile(imp_at_event, 95),
+        "weatherModel": "ECMWF",
+        "impactUnit": "people"
+    }
+    return imp_summary_dict
+
+def save_forecast_summary(forecast_summary: dict,
+                          save_dir: Union[str, Path]):
+    """
+    Save the  summary into a geoJSON feature collection.
+    """
+    # Create a GeoJSON FeatureCollection structure
+    geojson_data = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": forecast_summary,
+                "geometry": None  # Set to None if there's no specific geometry
+            }
+        ]
+    }
+
+    # Save the GeoJSON data to a file
+    with open(save_dir, 'w') as f:
+        json.dump(geojson_data, f, indent=4)
+
+def make_save_summary_filename(imp_summary_dict: dict):
+    """
+    Make a file name for saving
+    """
+    forecast_filename = (
+        f'impact-summary_TC_ECMWF_ens_{imp_summary_dict["eventName"]}_{imp_summary_dict["initializationTime"]}'
+        f'_{imp_summary_dict["countryISO3"]}_{imp_summary_dict["impactType"]}.json'
+        )
+    return forecast_filename
+
+def _check_event_no(impact: Impact):
+    """
+    For some TC events, there is less than 51 esemble. Hence, checke if the 
+    impact.at_event lenth equals to 51. If not, fill the missing event as 0.
+    """
+
+    imp_at_event = impact.at_event
+
+    if len(imp_at_event) == 51:
+        return imp_at_event
+    else:
+        no_missing_zeros = 51 - len(imp_at_event)
+        new_imp_at_event = np.pad(imp_at_event, pad_width=(0, no_missing_zeros),
+                                  mode='constant', constant_values=0)
+        return new_imp_at_event

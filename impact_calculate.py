@@ -26,14 +26,16 @@ from impact_calc_func import (
     impf_set_exposed_pop, impf_set_displacement,
     round_to_previous_12h_utc, get_forecast_times,
     get_tc_wind_files, summarize_forecast,
-    save_forecast_summary, make_save_summary_filename
-)
+    save_forecast_summary, save_average_impact_geospatial_points,
+    )
 
 # Save directories
 SAVE_DIR = "./test_dir/"
 
 # get the wind files
 TC_WIND_DIR = "./demo/data/tc_wind" # change to a scratch folder
+
+EXPOSED_TO_WIND_THRESHOLD = 32.92 # threshold for people exposed to wind in m/s
 
 # Get the current timestamp
 # current_timestamp = pd.Timestamp.now().tz_localize('UTC')
@@ -83,7 +85,7 @@ for tc_file in tc_wind_files:
             continue
 
         # run impact calc for people exposed to cat. 1 wind speed or above
-        impf_exposed = impf_set_exposed_pop()
+        impf_exposed = impf_set_exposed_pop(threshold=EXPOSED_TO_WIND_THRESHOLD)
 
         impact_exposed = ImpactCalc(exp, impf_exposed, tc_haz).impact()
 
@@ -98,8 +100,13 @@ for tc_file in tc_wind_files:
                                         tc_name=tc_name,
                                         impact=impact_exposed)
 
-        save_forecast_summary(imp_exposed_summary, 
-            SAVE_DIR +make_save_summary_filename(imp_exposed_summary))
+        save_forecast_summary(
+            SAVE_DIR,
+            imp_exposed_summary)
+        save_average_impact_geospatial_points(
+            SAVE_DIR,
+            imp_exposed_summary,
+            impact_exposed)
 
         # run the same impact calc but for displacement
         impf_displacement = impf_set_displacement(country_iso3)
@@ -116,6 +123,12 @@ for tc_file in tc_wind_files:
                                                     tc_name=tc_name,
                                                     impact=impact_displacement)
 
-        save_forecast_summary(imp_displacement_summary, 
-            SAVE_DIR +make_save_summary_filename(imp_displacement_summary))
+        save_forecast_summary(
+            SAVE_DIR,
+            imp_displacement_summary)
+        
+        save_average_impact_geospatial_points(
+            SAVE_DIR,
+            imp_displacement_summary,
+            impact_displacement)
 

@@ -219,8 +219,8 @@ def summarize_forecast(country_iso3: str,
     }
     return imp_summary_dict
 
-def save_forecast_summary(forecast_summary: dict,
-                          save_dir: Union[str, Path]):
+def save_forecast_summary(save_dir: Union[str, Path],
+                          forecast_summary: dict):
     """
     Save the  summary into a geoJSON feature collection.
     """
@@ -237,18 +237,58 @@ def save_forecast_summary(forecast_summary: dict,
     }
 
     # Save the GeoJSON data to a file
-    with open(save_dir, 'w') as f:
+    with open(save_dir+make_save_filename(forecast_summary, save_file_type="summary"),
+              'w') as f:
         json.dump(geojson_data, f, indent=4)
 
-def make_save_summary_filename(imp_summary_dict: dict):
+def make_save_filename(imp_summary_dict: dict,
+                        save_file_type: str):
     """
     Make a file name for saving
+
+    Parameters
+    ----------
+    imp_summary_dict: dict
+        Impact forecast summary
+    
+    save_file_type: str
+        indicator of which type of file is saved
+    
+    Returns
+    -------
+    forecast_filename: str
+        File name for saving the files
     """
     forecast_filename = (
-        f'impact-summary_TC_ECMWF_ens_{imp_summary_dict["eventName"]}_{imp_summary_dict["initializationTime"]}'
+        f'impact-{save_file_type}_TC_ECMWF_ens_{imp_summary_dict["eventName"]}_{imp_summary_dict["initializationTime"]}'
         f'_{imp_summary_dict["countryISO3"]}_{imp_summary_dict["impactType"]}.json'
         )
     return forecast_filename
+
+def save_average_impact_geospatial_points(save_dir: Union[str, Path],
+                                          imp_summary_dict: dict,
+                                          impact: Impact,
+                                          include_zeros: bool = False):
+    """
+    Save the average impact of each grid points into a geoJSON file.
+
+    Parameters
+    ----------
+    impact: climada.engine.Impact
+
+    include_zeros: bool
+        Whether inclode grid points with impact equals to 0.
+        Default: False
+    """
+
+    imp_gdf = impact._build_exp().gdf
+
+    if include_zeros:
+        imp_gdf.to_file(save_dir+make_save_filename(imp_summary_dict, save_file_type="gdf"))
+    else:
+        imp_gdf.drop(imp_gdf[imp_gdf['value'] == 0].index, inplace=True)
+        imp_gdf.to_file(save_dir+make_save_filename(imp_summary_dict, save_file_type="gdf"))
+
 
 def _check_event_no(impact: Impact):
     """

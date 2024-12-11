@@ -27,7 +27,13 @@ from impact_calc_func import (
     round_to_previous_12h_utc, get_forecast_times,
     get_tc_wind_files, summarize_forecast,
     save_forecast_summary, save_average_impact_geospatial_points,
+    save_impact_at_event
     )
+from plot_func import (
+    plot_imp_map_exposed, plot_imp_map_displacement,
+    plot_histogram,
+    make_save_map_file_name, make_save_histogram_file_name
+)
 
 # Save directories
 SAVE_DIR = "./test_dir/"
@@ -107,6 +113,18 @@ for tc_file in tc_wind_files:
             SAVE_DIR,
             imp_exposed_summary,
             impact_exposed)
+        save_impact_at_event(
+            SAVE_DIR,
+            imp_exposed_summary,
+            impact_exposed)
+        
+        # save the impact map
+        ax_map_exposed = plot_imp_map_exposed(imp_exposed_summary, impact_exposed)
+        ax_map_exposed.figure.savefig(SAVE_DIR +make_save_map_file_name(imp_exposed_summary))
+
+        # save the histogram
+        ax_hist_exposed = plot_histogram(imp_exposed_summary, impact_exposed)
+        ax_hist_exposed.figure.savefig(SAVE_DIR +make_save_histogram_file_name(imp_exposed_summary))
 
         # run the same impact calc but for displacement
         impf_displacement = impf_set_displacement(country_iso3)
@@ -131,4 +149,16 @@ for tc_file in tc_wind_files:
             SAVE_DIR,
             imp_displacement_summary,
             impact_displacement)
+        save_impact_at_event(
+            SAVE_DIR,
+            imp_displacement_summary,
+            impact_displacement)
+        
+        # save the impact map
+        ax_map_displacement = plot_imp_map_displacement(imp_displacement_summary, impact_displacement)
+        ax_map_displacement.figure.savefig(SAVE_DIR +make_save_map_file_name(imp_displacement_summary))
+
+        # save the histogram
+        ax_hist_displacement = plot_histogram(imp_displacement_summary, impact_displacement)
+        ax_hist_displacement.figure.savefig(SAVE_DIR +make_save_histogram_file_name(imp_displacement_summary))
 

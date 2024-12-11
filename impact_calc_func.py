@@ -274,6 +274,12 @@ def save_average_impact_geospatial_points(save_dir: Union[str, Path],
 
     Parameters
     ----------
+    save_dir: Union[str, Path],
+        Directory where the output is saved to.
+
+    imp_summary_dict: dict
+        Summary of the forecast.
+
     impact: climada.engine.Impact
 
     include_zeros: bool
@@ -289,6 +295,37 @@ def save_average_impact_geospatial_points(save_dir: Union[str, Path],
         imp_gdf.drop(imp_gdf[imp_gdf['value'] == 0].index, inplace=True)
         imp_gdf.to_file(save_dir+make_save_filename(imp_summary_dict, save_file_type="gdf"))
 
+def save_impact_at_event(save_dir: Union[str, Path],
+                        imp_summary_dict: dict,
+                        impact: Impact):
+    """
+    Save the impact of each event into a CSV file.
+
+    Parameters
+    ----------
+    save_dir: Union[str, Path],
+        Directory where the output is saved to.
+
+    imp_summary_dict: dict
+        Summary of the forecast.
+
+    impact: climada.engine.Impact
+    """
+    
+    at_event_dict = {'ensemble_id': [], 'at_event': []}
+
+    for idx_event, event_id in enumerate(impact.event_id):
+        at_event_dict['ensemble_id'].append(event_id)
+        at_event_dict['at_event'].append(impact.at_event[idx_event])
+
+    df = pd.DataFrame(at_event_dict)
+
+    save_file_name = (
+        f'impact-at-event_TC_ECMWF_ens_{imp_summary_dict["eventName"]}_{imp_summary_dict["initializationTime"]}'
+        f'_{imp_summary_dict["countryISO3"]}_{imp_summary_dict["impactType"]}.csv'
+        )
+    df.to_csv(save_dir +save_file_name)
+    
 
 def _check_event_no(impact: Impact):
     """

@@ -22,7 +22,9 @@ from tc_tracks_func import filter_storm, _correct_max_sustained_wind_speed
 
 time_start = time.time()
 
-SAVE_WIND_DIR = "../../data/tc_wind/"
+SAVE_WIND_DIR = "./demo/data/tc_wind/"
+
+N_ENSEMBLE = 51
 
 # retrieve the Centroids from 
 glob_centroids = client.get_centroids()
@@ -54,6 +56,7 @@ if len(tr_filter.data) != 0:
         # compute the windfield for each storm
         tc_wind_one_storm = TropCyclone.from_tracks(tr_one_storm, centroids_refine,
                                                     model="H1980")
+        tc_wind_one_storm.frequency = np.ones(len(tc_wind_one_storm.event_id))/N_ENSEMBLE
         tc_wind_one_storm.write_hdf5(SAVE_WIND_DIR +'tc_wind_' +tr_name +'_' +formatted_datetime +'.hdf5')
 
 else:

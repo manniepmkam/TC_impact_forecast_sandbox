@@ -61,7 +61,7 @@ else:
                    f"Current number of active storms: {str(len(tr_storm_id_list))}",
                    fontdict={"fontsize": 14})
 
-axis_png.figure.savefig(SAVE_FIG_DIR.format(formatted_datetime) +"ECMWF_TC_tracks_" +formatted_datetime +".png")
+axis_png.figure.savefig(SAVE_FIG_DIR.format(forecast_time=formatted_datetime) +"ECMWF_TC_tracks_" +formatted_datetime +".png")
 
 # plotting the global overview in interactive map
 if len(tr_filter.data)==0:
@@ -69,4 +69,4 @@ if len(tr_filter.data)==0:
 else:
     fig_interactive = plot_interactive_map(tr_filter)
 
-fig_interactive.write_html(SAVE_FIG_DIR.format(formatted_datetime) +"ECMWF_TC_tracks_interactive_map_" +formatted_datetime +".html")
+fig_interactive.write_html(SAVE_FIG_DIR.format(forecast_time=formatted_datetime) +"ECMWF_TC_tracks_interactive_map_" +formatted_datetime +".html")

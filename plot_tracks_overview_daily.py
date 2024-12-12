@@ -43,8 +43,8 @@ datetime_temp = run_datetime.astype('datetime64[s]').astype(str)
 formatted_datetime = datetime_temp.replace('T', '_')[:-6] + 'UTC'
 
 # create directory to store the figure
-if not os.path.exists(SAVE_FIG_DIR.format(formatted_datetime)):
-    os.makedirs(SAVE_FIG_DIR.format(formatted_datetime))
+if not os.path.exists(SAVE_FIG_DIR.format(forecast_time=formatted_datetime)):
+    os.makedirs(SAVE_FIG_DIR.format(forecast_time=formatted_datetime))
 
 # plotting the global overview in .png
 if len(tr_filter.data)==0:

@@ -182,11 +182,11 @@ def get_tc_wind_files(forecast_time: pd.Timestamp,
     
     if not tc_wind_files:
         print(f"No TC activities at {forecast_time_str}. Trying the previous forecast.")
-        previous_forecast_time_str = previous_forecast_time.strftime('%Y-%m-%d_%HUTC')
-        file_pattern = os.path.join(tc_wind_dir, f"*{previous_forecast_time_str}.hdf5")
+        forecast_time_str = previous_forecast_time.strftime('%Y-%m-%d_%HUTC')
+        file_pattern = os.path.join(tc_wind_dir, f"*{forecast_time_str}.hdf5")
         tc_wind_files = glob.glob(file_pattern)
         
-    return tc_wind_files
+    return forecast_time_str, tc_wind_files
     
 def summarize_forecast(country_iso3: str,
                        forecast_time: str,

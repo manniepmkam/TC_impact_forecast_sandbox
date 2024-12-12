@@ -12,6 +12,7 @@ Output: .png still image and and .html for the interactive plot
 import warnings
 warnings.filterwarnings("ignore")
 
+import os
 import pandas as pd
 import numpy as np
 
@@ -28,7 +29,7 @@ from plot_func import (
     plot_global_tracks, plot_empty_base_map, 
     plot_interactive_map, plot_empty_interactive_map
 )
-SAVE_FIG_DIR = ""
+SAVE_FIG_DIR = "/nfs/n2o/wcr/tc_imp_forecast/TC_imp_forecast/output/{forecast_time}"
 
 tr_fcast = TCForecast()
 tr_fcast.fetch_ecmwf()
@@ -40,6 +41,10 @@ _correct_max_sustained_wind_speed(tr_filter)
 run_datetime = tr_fcast.data[0].run_datetime
 datetime_temp = run_datetime.astype('datetime64[s]').astype(str)
 formatted_datetime = datetime_temp.replace('T', '_')[:-6] + 'UTC'
+
+# create directory to store the figure
+if not os.path.exists(SAVE_FIG_DIR.format(formatted_datetime)):
+    os.makedirs(SAVE_FIG_DIR.format(formatted_datetime))
 
 # plotting the global overview in .png
 if len(tr_filter.data)==0:
@@ -56,7 +61,7 @@ else:
                    f"Current number of active storms: {str(len(tr_storm_id_list))}",
                    fontdict={"fontsize": 14})
 
-axis_png.figure.savefig(SAVE_FIG_DIR +"ECMWF_TC_tracks_" +formatted_datetime +".png")
+axis_png.figure.savefig(SAVE_FIG_DIR.format(formatted_datetime) +"ECMWF_TC_tracks_" +formatted_datetime +".png")
 
 # plotting the global overview in interactive map
 if len(tr_filter.data)==0:
@@ -64,4 +69,4 @@ if len(tr_filter.data)==0:
 else:
     fig_interactive = plot_interactive_map(tr_filter)
 
-fig_interactive.write_html(SAVE_FIG_DIR +"ECMWF_TC_tracks_interactive_map_" +formatted_datetime +".html")
+fig_interactive.write_html(SAVE_FIG_DIR.format(formatted_datetime) +"ECMWF_TC_tracks_interactive_map_" +formatted_datetime +".html")

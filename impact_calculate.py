@@ -36,7 +36,7 @@ from plot_func import (
 )
 
 # Save directories
-SAVE_DIR = "/net/n2o/wcr/tc_imp_forecast/TC_imp_forecast/output/{forecast_time}/"
+SAVE_DIR = "/net/n2o/wcr/tc_imp_forecast/TC_imp_forecast/output/{forecast_time_str}/"
 
 # get the wind files
 TC_WIND_DIR = "/net/n2o/wcr/tc_imp_forecast/TC_imp_forecast/data/tc_wind/" # change to a scratch folder

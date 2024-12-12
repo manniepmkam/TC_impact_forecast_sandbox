@@ -106,24 +106,24 @@ for tc_file in tc_wind_files:
                                         impact=impact_exposed)
 
         save_forecast_summary(
-            SAVE_DIR.format(forecast_time_str),
+            SAVE_DIR.format(forecast_time_str=forecast_time_str),
             imp_exposed_summary)
         save_average_impact_geospatial_points(
-            SAVE_DIR.format(forecast_time_str),
+            SAVE_DIR.format(forecast_time_str=forecast_time_str),
             imp_exposed_summary,
             impact_exposed)
         save_impact_at_event(
-            SAVE_DIR.format(forecast_time_str),
+            SAVE_DIR.format(forecast_time_str=forecast_time_str),
             imp_exposed_summary,
             impact_exposed)
         
         # save the impact map
         ax_map_exposed = plot_imp_map_exposed(imp_exposed_summary, impact_exposed)
-        ax_map_exposed.figure.savefig(SAVE_DIR.format(forecast_time_str) +make_save_map_file_name(imp_exposed_summary))
+        ax_map_exposed.figure.savefig(SAVE_DIR.format(forecast_time_str=forecast_time_str) +make_save_map_file_name(imp_exposed_summary))
 
         # save the histogram
         ax_hist_exposed = plot_histogram(imp_exposed_summary, impact_exposed)
-        ax_hist_exposed.figure.savefig(SAVE_DIR.format(forecast_time_str) +make_save_histogram_file_name(imp_exposed_summary))
+        ax_hist_exposed.figure.savefig(SAVE_DIR.format(forecast_time_str=forecast_time_str) +make_save_histogram_file_name(imp_exposed_summary))
 
         # run the same impact calc but for displacement
         impf_displacement = impf_set_displacement(country_iso3)
@@ -141,22 +141,22 @@ for tc_file in tc_wind_files:
                                                     impact=impact_displacement)
 
         save_forecast_summary(
-            SAVE_DIR.format(forecast_time_str),
+            SAVE_DIR.format(forecast_time_str=forecast_time_str),
             imp_displacement_summary)
         
         save_average_impact_geospatial_points(
-            SAVE_DIR.format(forecast_time_str),
+            SAVE_DIR.format(forecast_time_str=forecast_time_str),
             imp_displacement_summary,
             impact_displacement)
         save_impact_at_event(
-            SAVE_DIR.format(forecast_time_str),
+            SAVE_DIR.format(forecast_time_str=forecast_time_str),
             imp_displacement_summary,
             impact_displacement)
         
         # save the impact map
         ax_map_displacement = plot_imp_map_displacement(imp_displacement_summary, impact_displacement)
-        ax_map_displacement.figure.savefig(SAVE_DIR.format(forecast_time_str) +make_save_map_file_name(imp_displacement_summary))
+        ax_map_displacement.figure.savefig(SAVE_DIR.format(forecast_time_str=forecast_time_str) +make_save_map_file_name(imp_displacement_summary))
 
         # save the histogram
         ax_hist_displacement = plot_histogram(imp_displacement_summary, impact_displacement)
-        ax_hist_displacement.figure.savefig(SAVE_DIR.format(forecast_time_str) +make_save_histogram_file_name(imp_displacement_summary))
+        ax_hist_displacement.figure.savefig(SAVE_DIR.format(forecast_time_str=forecast_time_str) +make_save_histogram_file_name(imp_displacement_summary))

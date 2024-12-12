@@ -44,8 +44,7 @@ TC_WIND_DIR = "/net/n2o/wcr/tc_imp_forecast/TC_imp_forecast/data/tc_wind/" # cha
 EXPOSED_TO_WIND_THRESHOLD = 32.92 # threshold for people exposed to wind in m/s
 
 # Get the current timestamp
-# current_timestamp = pd.Timestamp.now().tz_localize('UTC')
-current_timestamp = pd.Timestamp('2024-08-25 02:00', tz='UTC')
+current_timestamp = pd.Timestamp.now().tz_localize('UTC')
 
 forecast_time, previous_forecast_time = get_forecast_times(current_timestamp)
 forecast_time_str, tc_wind_files = get_tc_wind_files(forecast_time, previous_forecast_time, TC_WIND_DIR)

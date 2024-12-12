@@ -29,7 +29,7 @@ from plot_func import (
     plot_global_tracks, plot_empty_base_map, 
     plot_interactive_map, plot_empty_interactive_map
 )
-SAVE_FIG_DIR = "/nfs/n2o/wcr/tc_imp_forecast/TC_imp_forecast/output/{forecast_time}"
+SAVE_FIG_DIR = "/net/n2o/wcr/tc_imp_forecast/TC_imp_forecast/output/{forecast_time}/"
 
 tr_fcast = TCForecast()
 tr_fcast.fetch_ecmwf()

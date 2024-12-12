@@ -22,7 +22,7 @@ from tc_tracks_func import filter_storm, _correct_max_sustained_wind_speed
 
 time_start = time.time()
 
-SAVE_WIND_DIR = "/cluster/scratch/kampu/tc_wind_ecmwf/" # save to the scratch folder
+SAVE_WIND_DIR = "/net/n2o/wcr/tc_imp_forecast/TC_imp_forecast/data/tc_wind/" # save to the scratch folder
 
 N_ENSEMBLE = 51
 

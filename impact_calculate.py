@@ -36,10 +36,10 @@ from plot_func import (
 )
 
 # Save directories
-SAVE_DIR = "/nfs/n2o/wcr/tc_imp_forecast/TC_imp_forecast/output/{forecast_time}"
+SAVE_DIR = "/net/n2o/wcr/tc_imp_forecast/TC_imp_forecast/output/{forecast_time}/"
 
 # get the wind files
-TC_WIND_DIR = "/cluster/scratch/kampu/tc_wind_ecmwf/" # change to a scratch folder
+TC_WIND_DIR = "/net/n2o/wcr/tc_imp_forecast/TC_imp_forecast/data/tc_wind/" # change to a scratch folder
 
 EXPOSED_TO_WIND_THRESHOLD = 32.92 # threshold for people exposed to wind in m/s
 

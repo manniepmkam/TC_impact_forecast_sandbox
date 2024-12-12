@@ -79,7 +79,7 @@ for tc_file in tc_wind_files:
         country_iso3 = country_to_iso(country_code, "alpha3")
         try:
             exp = client.get_exposures(exposures_type='litpop',
-                                    properties={'country_iso3num':[str(country_code)],
+                                    properties={'country_iso3num':[str(country_code).zfill(3)],
                                                 'exponents':'(0,1)',
                                                 'fin_mode':'pop',
                                                 'version':'v2'

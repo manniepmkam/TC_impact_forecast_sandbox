@@ -3,8 +3,10 @@
 """
 Created on Mon Dec 2 10:45:50 2024
 
-This is a script to compute the TC wind field from the ECMWF forecast tracks.
-Output: climada.hazard.Hazard class in .hdf5 format
+Impact calculation for TC impact on people.
+Output: Impact forecast summary.
+        Aggregated impact for eact ensemble member and histogram plot.
+        Averaged impact for each grid point and map plot.
 
 @author: Pui Man (Mannie) Kam
 """
@@ -49,6 +51,7 @@ current_timestamp = pd.Timestamp.now().tz_localize('UTC')
 forecast_time, previous_forecast_time = get_forecast_times(current_timestamp)
 forecast_time_str, tc_wind_files = get_tc_wind_files(forecast_time, previous_forecast_time, TC_WIND_DIR)
 
+# stop running if there is no active storm.
 if not tc_wind_files:
     print(f"No TC activities at {forecast_time.strftime('%Y-%m-%d_%HUTC')}.")
     print("End impact calculation script")
@@ -104,7 +107,7 @@ for tc_file in tc_wind_files:
                                         tc_haz=tc_haz,
                                         tc_name=tc_name,
                                         impact=impact_exposed)
-
+ 
         save_forecast_summary(
             SAVE_DIR.format(forecast_time_str=forecast_time_str),
             imp_exposed_summary)

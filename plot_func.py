@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Useful functions for plotting.
+
+@author: Pui Man (Mannie) Kam
+"""
+
 import numpy as np
 import pandas as pd
 from typing import Union
@@ -47,6 +55,7 @@ for i in range(cmap.N):
     cmap_hex.append(mpl.colors.rgb2hex(rgba))
 
 def categorize_wind(speed):
+    """Saffir-Simpson Hurricane Scale"""
     if speed < 17.49:
         return -1  # Tropical depression
     elif speed < 32.92:
@@ -65,7 +74,7 @@ def categorize_wind(speed):
         return 999
 
 def plot_global_tracks(tc_tracks: TCTracks, figsize=(15,8)):
-
+    """Plot the global forecast TC tracks"""
     # define the figure and figure extent
     fig = plt.figure(figsize=figsize)
     axis = plt.axes(projection=ccrs.PlateCarree())
@@ -109,6 +118,7 @@ def plot_global_tracks(tc_tracks: TCTracks, figsize=(15,8)):
     return axis
 
 def plot_empty_base_map(figsize=(15,8)):
+    """Empty base map if no active storm"""
     # define the figure and figure extent
     fig = plt.figure(figsize=figsize)
     axis = plt.axes(projection=ccrs.PlateCarree())
@@ -135,6 +145,7 @@ def plot_empty_base_map(figsize=(15,8)):
     return axis
 
 def plot_interactive_map(tc_tracks: TCTracks, figsize=(15,8)):
+    """Interactive map for global forecast TC tracks"""
     fig = go.Figure()
 
     for track in tc_tracks.data:
@@ -188,6 +199,7 @@ def plot_interactive_map(tc_tracks: TCTracks, figsize=(15,8)):
     return fig
 
 def plot_empty_interactive_map(figsize=(15,8)):
+    """Empty base map if no active storm"""
     fig = go.Figure()
     # Add invisible traces for legend
     for category, color in zip(CUSTOM_LEGEND, cmap_hex):

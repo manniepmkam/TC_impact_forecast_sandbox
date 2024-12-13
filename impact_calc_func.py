@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Sep 23 11:35:50 2024
-
 Useful functions for impact calculations.
 
 @author: Pui Man (Mannie) Kam
